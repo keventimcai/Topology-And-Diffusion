@@ -4,17 +4,18 @@ import java.util.Random;
 public class SelfAvoidRW3D extends SelfAvoidRW2D {
     private static final double pi2 = 2.0 * Math.PI;
     private int z;
-    private double r2;
     private HashMap<Integer, Point_3D> traversed;
 
-    public SelfAvoidRW3D(int x, int y, int z) {
-        super(x, y);
+    public SelfAvoidRW3D(int x, int y, int z, int steps) {
+        super(x, y, steps);
         this.z = z;
+        this.traversed = new HashMap<Integer, Point_3D>();
     }
 
-    public SelfAvoidRW3D() {
-        super();
+    public SelfAvoidRW3D(int steps) {
+        super(steps);
         this.z = 0;
+        this.traversed = new HashMap<Integer, Point_3D>();
     }
 
     public int getZ() {
@@ -108,9 +109,9 @@ public class SelfAvoidRW3D extends SelfAvoidRW2D {
             }
 
             traversed.put(getHashKey(), new Point_3D(getX(), getY(), z));
+            this.setR2(this.getHashKey(),getX()* getX() + getY() * getY() + this.z * this.z);
+            this.incrementKey();
 
-
-            this.r2 = getX()* getX() + getY() * getY() + this.z * this.z;
             movable = false;
         }
 

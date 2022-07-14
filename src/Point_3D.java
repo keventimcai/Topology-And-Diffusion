@@ -1,7 +1,5 @@
-import SelfAvoiding.Point;
-
 public class Point_3D extends Point {
-    private final int z;
+    private int z;
     public Point_3D(int x, int y, int z) {
         super(x, y);
         this.z = z;
@@ -9,6 +7,9 @@ public class Point_3D extends Point {
 
     public int getZ() {
         return z;
+    }
+    public void setZ(int z) {
+        this.z = z;
     }
 
     @Override
