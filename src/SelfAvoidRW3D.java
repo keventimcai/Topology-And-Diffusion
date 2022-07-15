@@ -108,8 +108,8 @@ public class SelfAvoidRW3D extends SelfAvoidRW2D {
                 this.setX(this.getX() - 1);
             }
 
-            traversed.put(getHashKey(), new Point_3D(getX(), getY(), z));
             this.setR2(this.getHashKey(),getX()* getX() + getY() * getY() + this.z * this.z);
+            traversed.put(getHashKey(), new Point_3D(getX(), getY(), z));
             this.incrementKey();
 
             movable = false;
