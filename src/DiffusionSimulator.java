@@ -1,4 +1,4 @@
-import org.graphstream.graph.Graph;
+//import org.graphstream.graph.Graph;
 
 import java.util.*;
 
@@ -33,6 +33,8 @@ public class DiffusionSimulator {
         Set<String> ks = g.getVertices().keySet();
         String[] keys = ks.toArray(new String[ks.size()]);
 
+        
+
         for (int i = 0; i < runs; i++) {
             int max = g.numVertex();
             int vertex = rand.nextInt(max);
@@ -40,12 +42,20 @@ public class DiffusionSimulator {
         }
 
 
+        
+        //record the initial position
+        analysis recorder=new analysis();
+        recorder.setup();
+        recorder.initializeSaving();
+        for(int i= 0;i<runs;i++){
+            recorder.saveData(0, rws.get(i).getCurVertex().getName() , i+"");
+        }
+        
         // do random walk n times
-
         for (int i = 0; i < runs; i++) {
             for (int j = 0; j < n; j++) {
-                rws.get(i).run(rand);
-
+                String result=rws.get(i).runAndRecord(rand);
+                recorder.saveData(j, result, i+"");
             }
         }
     }
@@ -87,13 +97,61 @@ public class DiffusionSimulator {
         rw.generateRun(rand);
         while((!rw.getCurVertex().getName().equals(key)) && (rw.getCurVertex().getDegree() != 1)){
             rw.generateRun(rand);
-            System.out.println(rw.getCurVertex().getName());
+            //System.out.println(rw.getCurVertex().getName());
         }
         String curVert = rw.getCurVertex().getName();
         if(curVert != key && !graph.containsEdge(key, curVert)){
             graph.addEdge(key, curVert, 1);
         }
     }
+
+    void test(int runs,int n,int vertices){
+         // Take integer n and runs, and seed from user
+         int seed=1;
+
+ 
+ 
+         //Create the random walkers
+         //Perhaps we would like to randomly choose starting vertices based on weight
+         //This way hot spots are generated
+ 
+         Random rand = new Random(seed);
+         Graph_M g = generateGraph(vertices, rand, 0.5);
+         //g.display_Map();
+         ArrayList<RandomWalker> rws = new ArrayList<RandomWalker>();
+ 
+         Set<String> ks = g.getVertices().keySet();
+         String[] keys = ks.toArray(new String[ks.size()]);
+ 
+         
+ 
+         for (int i = 0; i < runs; i++) {
+             int max = g.numVertex();
+             int vertex = rand.nextInt(max);
+             rws.add(new RandomWalker(g.getVertex(keys[vertex]), g));
+         }
+ 
+ 
+         
+         //record the initial position
+         analysis recorder=new analysis();
+         recorder.setup();
+         recorder.saveGraphAndDegree(g.vertices);
+         recorder.initializeSaving();
+         for(int i= 0;i<runs;i++){
+             recorder.saveData(0, rws.get(i).getCurVertex().getName() , i+"");
+         }
+         
+         // do random walk n times
+         for (int i = 0; i < runs; i++) {
+             for (int j = 0; j < n; j++) {
+                 String result=rws.get(i).runAndRecord(rand);
+                 recorder.saveData(j, result, i+"");
+             }
+         }
+    }
+
+    
 
 //    /**
 //     * Given integer runs, return the radius of the circle of random walkers

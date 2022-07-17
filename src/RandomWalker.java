@@ -59,6 +59,19 @@ public class RandomWalker {
         incrementKey();
     }
 
+    public String runAndRecord(Random rand){
+        Object[] neighbors = curVertex.neighbors.keySet().toArray();
+
+        int choice = rand.nextInt(neighbors.length);
+        //move randomwalker by 1 step
+        String nextVertex = (String) neighbors[choice];
+        this.distances.add(distance + curVertex.neighbors.get(nextVertex));
+        this.graph.updateEdge(curVertex.getName(), nextVertex);
+        curVertex = this.graph.getVertex(nextVertex);
+        incrementKey();
+        return curVertex.getName();
+    }
+
     public void generateRun(Random rand){
         Object[] neighbors = curVertex.neighbors.keySet().toArray();
         HashSet<String> blockedMoves = new HashSet<String>();
