@@ -1,5 +1,6 @@
-import java.util.Random;
-import java.util.Scanner;
+import org.graphstream.graph.Graph;
+
+import java.util.*;
 
 public class DiffusionSimulator {
 
@@ -7,7 +8,7 @@ public class DiffusionSimulator {
     //Currently only generates some number of 3D self avoiding random walkers
     public static void main(String[] args) {
         // Take integer n and runs, and seed from user
-        int n, runs, seed;
+        int n, runs, seed, vertices;
         Scanner sc = new Scanner(System.in);
         System.out.print("Give the seed for random sequence: ");
         seed = sc.nextInt();
@@ -15,36 +16,82 @@ public class DiffusionSimulator {
         n = sc.nextInt();
         System.out.print("Give the number runs: ");
         runs = sc.nextInt();
+        System.out.print("Give the number of starting vertices for graph: ");
+        vertices = sc.nextInt();
         sc.close();
 
-        Graph_M g = new Graph_M();
-        Graph_M.Create_Metro_Map(g);
-        //Create the random walkers
-        SelfAvoidRW[] rws = new SelfAvoidRW[runs];
-        for (int i = 0; i < runs; i++){
-            rws[i] = new SelfAvoidRW(g.getVertex("Botanical Garden~B"), n, g);
-        }
 
-        //int radius = estimateRadius(runs);
-        //System.out.println(radius);
-        //int[] sphere = {0, 0, 0, radius};
-        //System.out.println(createWalks(sphere, rws, n));
+        //Create the random walkers
+        //Perhaps we would like to randomly choose starting vertices based on weight
+        //This way hot spots are generated
+
+        Random rand = new Random(seed);
+        Graph_M g = generateGraph(vertices, rand, 0.5);
+        g.display_Map();
+        ArrayList<RandomWalker> rws = new ArrayList<RandomWalker>();
+
+        Set<String> ks = g.getVertices().keySet();
+        String[] keys = ks.toArray(new String[ks.size()]);
+
+        for (int i = 0; i < runs; i++) {
+            int max = g.numVertex();
+            int vertex = rand.nextInt(max);
+            rws.add(new RandomWalker(g.getVertex(keys[vertex]), g));
+        }
 
 
         // do random walk n times
-        Random rand = new Random(seed);
-        for (int i = 0; i < runs; i++) {
-            for (int j = 0; j < n; j++) {
-                if(rws[i].movable()){
-                    rws[i].runAndAverage(rand);
-                }
-            }
-        }
 
         for (int i = 0; i < runs; i++) {
             for (int j = 0; j < n; j++) {
-                System.out.println(rws[i].getDistances(j));
+                rws.get(i).run(rand);
+
             }
+        }
+    }
+
+    /**
+     * Generates graph as stochastic process
+     *
+     * @return the generated graph
+     */
+    private static Graph_M generateGraph(int num, Random rand, double probability) {
+        Graph_M graph = new Graph_M();
+
+        Integer start = 0;
+        Integer end = 1;
+        graph.addVertex(start.toString());
+        graph.addVertex(end.toString());
+        graph.addEdge(start.toString(), end.toString(), 1);
+        int i = 2;
+        while(i < num) {
+            Set<String> ks = graph.getVertices().keySet();
+            String[] keys = ks.toArray(new String[ks.size()]);
+            int max = graph.numVertex();
+            int vertex = rand.nextInt(max);
+
+            if (rand.nextDouble() < probability) {
+                Integer index = i;
+                graph.addVertex(index.toString());
+                graph.addEdge(index.toString(), keys[vertex], 1);
+                i++;
+            } else {
+                startRW(graph, keys[vertex], rand);
+            }
+        }
+        return graph;
+    }
+
+    private static void startRW(Graph_M graph, String key, Random rand) {
+        RandomWalker rw = new RandomWalker(graph.getVertex(key), graph);
+        rw.generateRun(rand);
+        while((!rw.getCurVertex().getName().equals(key)) && (rw.getCurVertex().getDegree() != 1)){
+            rw.generateRun(rand);
+            System.out.println(rw.getCurVertex().getName());
+        }
+        String curVert = rw.getCurVertex().getName();
+        if(curVert != key && !graph.containsEdge(key, curVert)){
+            graph.addEdge(key, curVert, 1);
         }
     }
 

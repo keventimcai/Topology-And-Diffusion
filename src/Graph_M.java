@@ -27,6 +27,7 @@ public class Graph_M {
     public void addVertex(String vname) {
         Vertex vtx = new Vertex(vname);
         vertices.put(vname, vtx);
+
     }
 
     public void removeVertex(String vname) {
@@ -36,9 +37,14 @@ public class Graph_M {
         for (String key : keys) {
             Vertex nbrVtx = vertices.get(key);
             nbrVtx.neighbors.remove(vname);
+            nbrVtx.updateDegree();
         }
 
         vertices.remove(vname);
+    }
+
+    public static HashMap<String, Vertex> getVertices() {
+        return vertices;
     }
 
     public int numEdges() {
@@ -73,7 +79,9 @@ public class Graph_M {
         }
 
         vtx1.neighbors.put(vname2, value);
+        vtx1.updateDegree();
         vtx2.neighbors.put(vname1, value);
+        vtx2.updateDegree();
     }
 
     public void removeEdge(String vname1, String vname2) {
@@ -86,7 +94,9 @@ public class Graph_M {
         }
 
         vtx1.neighbors.remove(vname2);
+        vtx1.updateDegree();
         vtx2.neighbors.remove(vname1);
+        vtx2.updateDegree();
     }
 
     public void updateEdge(String vname1, String vname2){
@@ -116,10 +126,6 @@ public class Graph_M {
 
             for (String nbr : vtxnbrs) {
                 str = str + "\t" + nbr + "\t";
-                if (nbr.length() < 16)
-                    str = str + "\t";
-                if (nbr.length() < 8)
-                    str = str + "\t";
                 str = str + vtx.neighbors.get(nbr) + "\n";
             }
             System.out.println(str);
